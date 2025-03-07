@@ -1,0 +1,216 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import json
+import os
+import matplotlib.pyplot as plt
+import seaborn as sns
+import datetime
+
+palette = sns.color_palette("deep")
+
+##### Constants #####
+DATA_DIR = "data/events"
+INDEX_FILE = "data/index.json"
+
+##### Common functions #####
+
+
+@st.cache_data
+def load_index():
+    with open(INDEX_FILE, "r") as f:
+        return json.load(f)
+
+
+@st.cache_data
+def load_event_data(year, event_id):
+    file_path = os.path.join(DATA_DIR, year, f"{event_id}.json")
+    if not os.path.exists(file_path):
+        return None
+
+    with open(file_path, "r") as f:
+        return json.load(f)
+
+
+def process_event_data(event_data):
+    df = pd.json_normalize(event_data, max_level=0)
+    df.set_index("bib_number", inplace=True)
+
+    times = [{k.strip(): v["time"] for k, v in item.items()} for item in df.splits]
+
+    paces = [{k.strip(): v["pace"] for k, v in item.items()} for item in df.splits]
+
+    df_participants = df.drop(columns=["splits"])
+    df_participants.fillna({"age_class": "", "start_group": ""}, inplace=True)
+
+    return df_participants, pd.DataFrame(times, index=df.index), pd.DataFrame(paces, index=df.index)
+
+
+# 📊 Plot: Finish Time Probability Density Function
+def plot_pdf(df, bib_times=None):
+    finish_times = df["Finish"]
+    plt.figure(figsize=(10, 5))
+    sns.kdeplot(finish_times, fill=True, alpha=0.5, label="All Participants", cut=0)
+
+    mean_time = finish_times.mean()
+    median_time = finish_times.median()
+
+    plt.axvline(
+        mean_time,
+        color="green",
+        linestyle="dashed",
+        label=f"Mean ({str(datetime.timedelta(seconds=int(mean_time)))})",
+    )
+    plt.axvline(
+        median_time,
+        color="blue",
+        linestyle="dashed",
+        label=f"Median ({str(datetime.timedelta(seconds=int(median_time)))})",
+    )
+
+    if bib_times is not None:
+        bib_time = bib_times["Finish"]
+        plt.axvline(
+            bib_time,
+            color="red",
+            linestyle="dashed",
+            label=f"Bib {bib_times.name} ({str(datetime.timedelta(seconds=int(bib_time)))})",
+        )
+
+    def time_seconds_to_HH_MM(seconds: float) -> str:
+        minutes = seconds // 60
+        hours = minutes // 60
+        minutes -= hours * 60
+        return f"{int(hours):02}:{int(minutes):02}"
+
+    min_time = finish_times.min()
+    max_time = finish_times.max()
+    xticks = np.arange(
+        np.floor(min_time / 900) * 900, max_time, 900
+    )  # Every 15 minutes
+    plt.xticks(xticks, [time_seconds_to_HH_MM(x) for x in xticks], rotation=45, ha="right", rotation_mode='anchor')
+
+    plt.xlabel("Finish Time (HH:MM:SS)")
+    plt.ylabel("Density")
+    plt.title("Probability Density Function of Finish Times")
+    plt.legend()
+    st.pyplot(plt)
+
+
+# 📊 Plot: Violin Plot of Pace by Split Location
+def plot_violin(df: pd.DataFrame, bib_paces: pd.DataFrame = None):
+
+    plt.figure(figsize=(12, 6))
+    sns.violinplot(df, inner="quartile", cut=0, color=palette.as_hex()[-2])
+    plt.xticks(rotation=45, ha="right", rotation_mode='anchor')
+
+    def pace_decimal_to_MM_SS(pace: float) -> str:
+        minutes = int(pace)
+        seconds = (pace * 60) % 60
+        return f"{int(minutes):02}:{int(seconds):02}"
+
+    if bib_paces is not None:
+        plt.scatter(bib_paces.index, bib_paces, color="red")
+        for ix, col in enumerate(bib_paces.index):
+            plt.annotate(pace_decimal_to_MM_SS(bib_paces[col]), (ix, bib_paces[col]), color="red", ha="center", va="bottom")
+
+    plt.xlabel("Split Location")
+    plt.ylabel("Pace (min/km)")
+    plt.title(
+        "Pace Distribution at Each Split Location (dashed lines represent quartiles)"
+    )
+    st.pyplot(plt)
+
+
+################# Streamlit app ###################
+
+##### Load index #####
+
+index_data = load_index()
+
+
+##### Select primary event #####
+st.sidebar.title("Vasalytics")
+st.sidebar.markdown("The missing analytics tool for all race events part of Vasaloppet`s Winter and Summer Week.")
+st.sidebar.divider()
+st.sidebar.header("Primary event")
+selected_year = st.sidebar.selectbox(
+    "Select Year", sorted(index_data.keys(), reverse=True)
+)
+
+# Sidebar: Event selection (filtered by year)
+events = index_data[selected_year]
+event_names = list(events.values())
+event_ids = list(events.keys())
+
+selected_event_name = st.sidebar.selectbox("Select Event", event_names, index=event_names.index("Vasaloppet") if "Vasaloppet" in event_names else 0)
+selected_event_id = event_ids[event_names.index(selected_event_name)]  # Get corresponding event_id
+
+
+##### Load event data #####
+if not (event_data := load_event_data(selected_year, selected_event_id)):
+    st.error("No data available for this event.")
+    st.stop()
+
+# Process event data into DataFrames
+df_participants, df_times, df_paces = process_event_data(event_data)
+
+
+##### Filter event data #####
+mask = pd.Series(True, index=df_participants.index)
+
+#### Gender ####
+can_filter_on_gender_male = any(
+    item.startswith("H") for item in df_participants["age_class"].unique()
+)
+can_filter_on_gender_female = any(
+    item.startswith("D") for item in df_participants["age_class"].unique()
+)
+
+selected_gender = st.sidebar.selectbox(
+    "Filter by Gender",
+    (
+        ["All"]
+        + (
+            ["H", "D"]
+            if (can_filter_on_gender_male and can_filter_on_gender_female)
+            else []
+        )
+    ),
+)
+if selected_gender != "All":
+    mask_gender = df_participants["age_class"].str.startswith(selected_gender)
+    mask &= mask_gender
+
+
+selected_start_group = st.sidebar.selectbox(
+    "Filter by Start Group", ["All"] + list(df_participants["start_group"].unique())
+)
+if selected_start_group != "All":
+    mask &= df_participants["start_group"] == selected_start_group
+
+
+# Apply filters
+df_all_filtered = df_participants[mask]
+df_times_filtered = df_times[mask]
+df_paces_filtered = df_paces[mask]
+
+##### Bib bumber to highlight #####
+selected_bib = st.sidebar.text_input("Enter Bib Number (Optional)", "")
+if not selected_bib:
+    bib_times = bib_paces = None
+
+elif selected_bib not in df_participants.index:
+    st.error("Could not find data for this bib number!")
+    st.stop()
+
+else:
+    bib_times = df_times.loc[selected_bib]
+    bib_paces = df_paces.loc[selected_bib]
+
+
+st.sidebar.divider()
+
+# Display plots
+plot_pdf(df_times_filtered, bib_times)
+plot_violin(df_paces_filtered, bib_paces)
