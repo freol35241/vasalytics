@@ -1,3 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Stlite App</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@stlite/browser@0.76.0/build/style.css"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@0.76.0/build/stlite.js";
+      mount(
+  {
+    requirements: ["requests", "matplotlib", "seaborn", "numpy", "pandas"], // Packages to install
+    entrypoint: "main.py", // The target file of the `streamlit run` command
+    files: {
+      "main.py": `
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -131,7 +156,7 @@ index_data = load_index()
 
 ##### Select primary event #####
 st.sidebar.title("Vasalytics")
-st.sidebar.markdown("The missing analytics tool for all race events part of Vasaloppet`s Winter and Summer Week.")
+st.sidebar.markdown("The missing analytics tool for all race events part of Vasaloppet\`s Winter and Summer Week.")
 st.sidebar.divider()
 st.sidebar.header("Primary event")
 selected_year = st.sidebar.selectbox(
@@ -215,3 +240,16 @@ st.sidebar.divider()
 st.subheader(f"Results for {selected_event_name} ({selected_year})")
 plot_pdf(df_times_filtered, bib_times)
 plot_violin(df_paces_filtered, bib_paces)
+
+`,
+    },
+    streamlitConfig: {
+      // Streamlit configuration
+      "client.toolbarMode": "viewer",
+    },
+  },
+  document.getElementById("root"),
+);
+    </script>
+  </body>
+</html>

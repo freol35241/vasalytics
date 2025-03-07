@@ -37,6 +37,7 @@ jobs:
         run: |
           mkdir pages_artifact
           cp -r data pages_artifact
+          cp app/index.html pages_artifact
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

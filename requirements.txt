@@ -1,7 +1,8 @@
 scrapy
+tqdm
 streamlit
+requests
 matplotlib
 seaborn
 numpy
 pandas
-tqdm
