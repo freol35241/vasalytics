@@ -1,0 +1,37 @@
+name: Run scraper for results.vasaloppet.se
+
+on:
+  # Runs every day at midnight
+  schedule:
+  - cron: "0 0 * * *"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  scraper:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: 'x64'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Run scraper
+        run: |
+          cd scraper
+          python3 run_scraper.py
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Automated scraping of results.vasaloppet.se
+          file_pattern: 'data'
+          add_options: '-A'
