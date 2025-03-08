@@ -48,7 +48,7 @@ def run_crawler(year, event_id):
     process = CrawlerProcess(
         settings={
             "FEEDS": {
-                feed_output_uri: {"format": "json"},
+                feed_output_uri: {"format": "json", "overwrite": True},
             },
             "FEED_EXPORT_ENCODING": "utf-8",
             "ROBOTSTXT_OBEY": False,
