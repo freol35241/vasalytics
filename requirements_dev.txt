@@ -1,5 +1,6 @@
 -r requirements.txt
 streamlit
+streamlit-extras
 matplotlib
 seaborn
 numpy

@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import json
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import datetime
 import requests
+from streamlit_extras.badges import badge
 
 ##### Constants #####
 API_ROOT = "https://freol35241.github.io/vasalytics/data/"
@@ -24,16 +24,15 @@ def load_index():
     return response.json()
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_event_data(year, event_id):
+    # Fetch data
     url = os.path.join(API_ROOT, "events", year, f"{event_id}.json")
     response = requests.get(url)
     response.raise_for_status()
-    return response.json()
 
-
-def process_event_data(event_data):
-    df = pd.json_normalize(event_data, max_level=0)
+    # Pre-process data
+    df = pd.json_normalize(response.json(), max_level=0)
     df.set_index("bib_number", inplace=True)
 
     times = [{k.strip(): v["time"] for k, v in item.items()} for item in df.splits]
@@ -45,6 +44,12 @@ def process_event_data(event_data):
 
     return df_participants, pd.DataFrame(times, index=df.index), pd.DataFrame(paces, index=df.index)
 
+def render_default():
+    st.header("Welcome to Vasalytics!")
+    st.markdown("Start by selecting a year and event you would like to have a closer look at using the sidebar to the left.")
+    st.image(
+        "https://upload.wikimedia.org/wikipedia/commons/2/28/Skate_skiing_track.jpg",
+        caption="Tiia Monto, CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>, via Wikimedia Commons")
 
 # 📊 Plot: Finish Time Probability Density Function
 def plot_pdf(df, bib_times=None):
@@ -94,7 +99,6 @@ def plot_pdf(df, bib_times=None):
     plt.ylabel("Density")
     plt.title("Probability Density Function of Finish Times")
     plt.legend()
-    st.pyplot(plt)
 
 
 # 📊 Plot: Violin Plot of Pace by Split Location
@@ -119,42 +123,57 @@ def plot_violin(df: pd.DataFrame, bib_paces: pd.DataFrame = None):
     plt.title(
         "Pace Distribution at Each Split Location (dashed lines represent quartiles)"
     )
-    st.pyplot(plt)
 
 
 ################# Streamlit app ###################
 
-##### Load index #####
-
-index_data = load_index()
-
-
-##### Select primary event #####
-st.sidebar.title("Vasalytics")
-st.sidebar.markdown("The missing analytics tool for all race events part of Vasaloppet`s Winter and Summer Week.")
-st.sidebar.divider()
-st.sidebar.header("Primary event")
-selected_year = st.sidebar.selectbox(
-    "Select Year", sorted(index_data.keys(), reverse=True)
+st.set_page_config(
+    page_title="Vasalytics",
+    page_icon=":material/analytics:"
 )
+
+##### Load index #####
+index_data = load_index() # We will always need the index, lets start by loading that one
+
+
+## Sidebar ##
+with st.sidebar:
+    st.markdown("# Vasalytics :material/analytics:")
+    badge(type="github", name="freol35241/vasalytics")
+    st.markdown("The missing analytics tool for all race events part of Vasaloppet`s Winter and Summer Week.")
+
+
+##### Select event #####
+st.sidebar.divider()
+st.sidebar.header("Event")
+if not (selected_year := st.sidebar.selectbox(
+    "Select Year", sorted(index_data.keys(), reverse=True), index=None
+)):
+    render_default()
+    st.stop()
 
 # Sidebar: Event selection (filtered by year)
 events = index_data[selected_year]
 event_names = list(events.values())
 event_ids = list(events.keys())
 
-selected_event_name = st.sidebar.selectbox("Select Event", event_names, index=event_names.index("Vasaloppet") if "Vasaloppet" in event_names else 0)
+if not (selected_event_name := st.sidebar.selectbox("Select Event", event_names, index=None)):
+    render_default()
+    st.stop()
+
 selected_event_id = event_ids[event_names.index(selected_event_name)]  # Get corresponding event_id
 
 
 ##### Load event data #####
+st.toast(f"Loading data for event: {selected_event_name} ({selected_year})")
 if not (event_data := load_event_data(selected_year, selected_event_id)):
     st.error("No data available for this event.")
     st.stop()
 
-# Process event data into DataFrames
-df_participants, df_times, df_paces = process_event_data(event_data)
-
+df_participants, df_times, df_paces = event_data
+# # Process event data into DataFrames
+# df_participants, df_times, df_paces = process_event_data(event_data)
+# st.toast(f"Processed data for event: {selected_event_name} ({selected_year})")
 
 ##### Filter event data #####
 mask = pd.Series(True, index=df_participants.index)
@@ -196,13 +215,13 @@ df_times_filtered = df_times[mask]
 df_paces_filtered = df_paces[mask]
 
 ##### Bib bumber to highlight #####
-selected_bib = st.sidebar.text_input("Enter Bib Number (Optional)", "")
+selected_bib = st.sidebar.text_input("Enter Bib Number (Optional)", value=None)
 if not selected_bib:
     bib_times = bib_paces = None
 
 elif selected_bib not in df_participants.index:
-    st.error("Could not find data for this bib number!")
-    st.stop()
+    st.warning("Could not find data for this bib number!")
+    bib_times = bib_paces = None
 
 else:
     bib_times = df_times.loc[selected_bib]
@@ -213,5 +232,9 @@ st.sidebar.divider()
 
 # Display results
 st.subheader(f"Results for {selected_event_name} ({selected_year})")
+
+st.toast(f"Preparing output for event ({selected_event_name})")
 plot_pdf(df_times_filtered, bib_times)
+st.pyplot(plt)
 plot_violin(df_paces_filtered, bib_paces)
+st.pyplot(plt)
