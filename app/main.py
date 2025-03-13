@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
+import asyncio
 import matplotlib.pyplot as plt
 import seaborn as sns
 import datetime
 import requests
-from streamlit_extras.badges import badge
 
 ##### Constants #####
 API_ROOT = "https://freol35241.github.io/vasalytics/data/"
@@ -32,7 +32,10 @@ def load_event_data(year, event_id):
     response.raise_for_status()
 
     # Pre-process data
-    df = pd.json_normalize(response.json(), max_level=0)
+    if (df := pd.json_normalize(response.json(), max_level=0)).empty:
+        st.error("No data available for this event.")
+        st.stop()
+
     df.set_index("bib_number", inplace=True)
 
     times = [{k.strip(): v["time"] for k, v in item.items()} for item in df.splits]
@@ -139,7 +142,7 @@ index_data = load_index() # We will always need the index, lets start by loading
 ## Sidebar ##
 with st.sidebar:
     st.markdown("# Vasalytics :material/analytics:")
-    badge(type="github", name="freol35241/vasalytics")
+    st.markdown("<a href='https://github.com/freol35241/vasalytics' target='_blank'><img src='https://badgen.net/badge/freol35241/vasalytics?icon=github' border='0' alt='Github repository' /></a>  <a href='https://ko-fi.com/Q5Q81BU8ER' target='_blank'><img height='20' style='border:0px;height:20px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>", unsafe_allow_html=True)
     st.markdown("The missing analytics tool for all race events part of Vasaloppet`s Winter and Summer Week.")
 
 
@@ -163,7 +166,6 @@ if not (selected_event_name := st.sidebar.selectbox("Select Event", event_names,
 
 selected_event_id = event_ids[event_names.index(selected_event_name)]  # Get corresponding event_id
 
-
 ##### Load event data #####
 st.toast(f"Loading data for event: {selected_event_name} ({selected_year})")
 if not (event_data := load_event_data(selected_year, selected_event_id)):
@@ -171,9 +173,6 @@ if not (event_data := load_event_data(selected_year, selected_event_id)):
     st.stop()
 
 df_participants, df_times, df_paces = event_data
-# # Process event data into DataFrames
-# df_participants, df_times, df_paces = process_event_data(event_data)
-# st.toast(f"Processed data for event: {selected_event_name} ({selected_year})")
 
 ##### Filter event data #####
 mask = pd.Series(True, index=df_participants.index)
