@@ -1,43 +1,95 @@
-import re
+import json
+from pathlib import Path
 
-from scrapy.linkextractors import LinkExtractor
+import requests
+from tqdm import tqdm
+from scrapy import Request
 from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 
-# Precompile regex patterns for efficiency
-PACE_PATTERN = re.compile(r"(\d+):(\d+)")
-TIME_PATTERN = re.compile(r"(\d+):(\d+):(\d+)")
+from utils import convert_pace_to_float, convert_time_to_seconds, forward_metadata
 
+MAIN_EVENT = "Vasaloppet"
 
-def convert_pace_to_float(pace_str):
-    """Converts 'MM:SS' string to float (fractional minutes)."""
-    match = PACE_PATTERN.match(pace_str)
-    if match:
-        minutes, seconds = map(int, match.groups())
-        return minutes + (seconds / 60)
+DATA_ROOT = Path(__file__).parent.parent / "data"
 
+MAIN_EVENT_ROOT = DATA_ROOT / MAIN_EVENT
+MAIN_EVENT_ROOT.mkdir(parents=True, exist_ok=True)
 
-def convert_time_to_seconds(time_str):
-    """Converts 'HH:MM:SS' string to integer (total seconds)."""
-    match = TIME_PATTERN.match(time_str)
-    if match:
-        hours, minutes, seconds = map(int, match.groups())
-        return (hours * 3600) + (minutes * 60) + seconds
+INDEX_FILE = MAIN_EVENT_ROOT / "index.json"
 
 
-class VasalyticsSpider(CrawlSpider):
+def get_years():
+    response = requests.get(
+        "https://results.vasaloppet.se/index.php?content=ajax2&func=getSearchFields&options"
+    )
+    response.raise_for_status()
+    return [
+        str(item["v"][0])
+        for item in response.json()["branches"]["lists"]["fields"]["event_main_group"][
+            "data"
+        ]
+        if isinstance(item["v"][0], int)
+    ]
+
+
+def get_events(year: int):
+    response = requests.get(
+        f"https://results.vasaloppet.se/2025/index.php?content=ajax2&func=getSearchFields&options%5Bb%5D%5Blists%5D%5Bevent_main_group%5D={year}"
+    )
+    response.raise_for_status()
+    return {
+        item["v"][0]: item["v"][1]
+        for item in response.json()["branches"]["lists"]["fields"]["event"]["data"]
+    }
+
+
+class Vasaloppet(CrawlSpider):
     name = "vasalytics"
     rules = (
         Rule(
             LinkExtractor(restrict_css="ul.pagination > li.pages-nav-button"),
             follow=True,
+            process_request=forward_metadata,
         ),
-        Rule(LinkExtractor(allow=r"\?content=detail"), callback="parse_details"),
+        Rule(LinkExtractor(allow=r"\?content=detail"), callback="parse_details", process_request=forward_metadata),
     )
 
-    def __init__(self, event_id, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def start_requests(self):
 
-        self.start_urls = [f"https://results.vasaloppet.se/?event={event_id}&pid=list"]
+        # Get all the years for which there is an event that we can scrape
+        for year in get_years():
+
+            # Fetch all events for this year
+            events = get_events(year)
+
+            for event_id, event_name in tqdm(events.items()):
+
+                if INDEX_FILE.exists():
+                    with INDEX_FILE.open(encoding="utf-8") as source:
+                        index = json.load(source)
+                else:
+                    index = {}
+
+                # If event_id is not already in the index file, lets scrape this event
+                if not index.get(year, {}).get(event_id):
+
+                    identifier = (MAIN_EVENT, year, event_id)
+
+                    yield Request(
+                        f"https://results.vasaloppet.se/?event={event_id}&pid=list",
+                        dont_filter=True,
+                        meta={"identifier": identifier},
+                    )
+
+                    # Update index
+                    (index.setdefault(year, {}))[event_id] = event_name
+
+                    # And persist to disc
+                    with INDEX_FILE.open("w", encoding="utf-8") as target:
+                        json.dump(
+                            index, target, indent=4, sort_keys=True, ensure_ascii=False
+                        )
 
     def parse_details(self, response):
         """Extracts split data for each participant"""
@@ -60,6 +112,9 @@ class VasalyticsSpider(CrawlSpider):
                     "pace": convert_pace_to_float(pace),
                 }
 
+        # We want at least one split to push this item down the pipe
         if splits:
-            # We want at least one split to push this item down the pipe
+
+            # Make sure we forward the metadata
+            output["identifier"] = response.meta["identifier"]
             yield output
