@@ -10,4 +10,10 @@ This repository contains four (4) distinct parts:
 * The vasalytics frontend (powered by streamlit). See [app](./app/).
 * Github Actions workflows for automatic scraping of new race events and continuous deployments of updated versions of the frontend. See [workflows](./.github/workflows/).
 
+## Development setup
+
 To get started developing, clone the repository and use the provided devcontainer setup.
+
+To run the scraper locally: `cd scraper; python3 run_scraper.py`
+
+To run the streamlit app in debug mode: `streamlit run app/main.py`

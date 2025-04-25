@@ -33,7 +33,7 @@ def load_event_data(year, event_id):
 
     # Pre-process data
     if (df := pd.json_normalize(response.json(), max_level=0)).empty:
-        st.error("No data available for this event.")
+        st.warning("For some reason, there is no data available for this event...")
         st.stop()
 
     df.set_index("bib_number", inplace=True)
