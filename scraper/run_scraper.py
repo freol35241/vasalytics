@@ -16,6 +16,34 @@ EVENT_DATA_ROOT.mkdir(parents=True, exist_ok=True)
 INDEX_FILE = DATA_ROOT / "index.json"
 
 
+def has_valid_data(file_path: Path) -> bool:
+    """
+    Check if a JSON file contains actual data (not empty or just an empty array).
+    
+    Args:
+        file_path: Path to the JSON file to check
+        
+    Returns:
+        bool: True if file contains meaningful data, False otherwise
+    """
+    if not file_path.exists():
+        return False
+    
+    try:
+        with file_path.open(encoding="utf-8") as f:
+            data = json.load(f)
+        
+        # Check if data is a non-empty list with actual content
+        if isinstance(data, list) and len(data) > 0:
+            return True
+        
+        # File exists but contains empty data
+        return False
+    except (json.JSONDecodeError, IOError):
+        # File is corrupted or unreadable
+        return False
+
+
 def get_years():
     response = requests.get(
         "https://results.vasaloppet.se/index.php?content=ajax2&func=getSearchFields&options"
@@ -79,19 +107,35 @@ if __name__ == "__main__":
             else:
                 index = {}
 
-            # If event_id is not already in the index file, lets scrape this event
-            if not index.get(year, {}).get(event_id):
+            # Check if we need to scrape this event
+            # Skip if event is in index AND file exists with valid data
+            event_file = EVENT_DATA_ROOT / year / f"{event_id}.json"
+            skip_event = (
+                index.get(year, {}).get(event_id) and  # Event is in index
+                has_valid_data(event_file)             # File has actual data
+            )
+            
+            if not skip_event:
 
                 # Start scraping (run this in a separate Process to avoid problems with the twisted reactor not being restartable)
                 p = multiprocessing.Process(target=run_crawler, args=(year, event_id))
                 p.start()
                 p.join()
 
-                # Update index
-                (index.setdefault(year, {}))[event_id] = event_name
-
-                # And persist to disc
-                with INDEX_FILE.open("w", encoding="utf-8") as target:
-                    json.dump(
-                        index, target, indent=4, sort_keys=True, ensure_ascii=False
-                    )
+                # Check if the scraped file contains valid data
+                event_file = EVENT_DATA_ROOT / year / f"{event_id}.json"
+                if has_valid_data(event_file):
+                    # Update index only if we got valid data
+                    (index.setdefault(year, {}))[event_id] = event_name
+                    
+                    # And persist to disc
+                    with INDEX_FILE.open("w", encoding="utf-8") as target:
+                        json.dump(
+                            index, target, indent=4, sort_keys=True, ensure_ascii=False
+                        )
+                else:
+                    # Remove empty file if it was created
+                    if event_file.exists():
+                        event_file.unlink()
+                        print(f"Removed empty file for {year}/{event_id}")
+                    # Don't add to index since no valid data was found
