@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vasalytics - POC</title>
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Vasalytics POC 📊</h1>
+      <p>JavaScript frontend for Vasaloppet race analytics</p>
+    </header>
+    
+    <div class="container">
+      <aside class="sidebar">
+        <div class="controls">
+          <h3>Event Selection</h3>
+          <div id="event-selector"></div>
+          
+          <h3>Filters</h3>
+          <div id="filter-panel"></div>
+        </div>
+      </aside>
+      
+      <main class="content">
+        <div id="loading" class="loading hidden">Loading...</div>
+        <div id="error" class="error hidden"></div>
+        <div id="chart-container"></div>
+      </main>
+    </div>
+  </div>
+  
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
