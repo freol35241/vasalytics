@@ -2,8 +2,8 @@ name: Run scraper for results.vasaloppet.se
 
 on:
   # Runs every day at midnight
-  schedule:
-  - cron: "0 0 * * *"
+  # schedule:
+  # - cron: "0 0 * * *"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
