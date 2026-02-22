@@ -303,6 +303,7 @@
         "S45M_9999991678885900000000F3": "Skejtvasan 45km",
         "S45T_9999991678885900000000F3": "Skejtvasan 45km (Tävling)",
         "STV_9999991678885900000000F3": "Stafettvasan",
+        "TVM_9999991678885900000000F3": "Tjejvasan (Motion)",
         "TVT_9999991678885900000000F3": "Tjejvasan (Tävling)",
         "VL30_9999991678885900000000F3": "Vasaloppet 30",
         "VL_9999991678885900000000F3": "Vasaloppet",
@@ -804,5 +805,18 @@
         "ÖSM4_HCH8NDMR2500": "Öppet Spår måndag 45",
         "ÖSM9_HCH8NDMR2500": "Öppet Spår måndag 90",
         "ÖSS9_HCH8NDMR2500": "Öppet Spår söndag"
+    },
+    "2026": {
+        "HVS1_HCH8NDMR2600": "Hemmavasan skidor 10",
+        "HVS3_HCH8NDMR2600": "Hemmavasan skidor 30",
+        "HVS4_HCH8NDMR2600": "Hemmavasan skidor 45",
+        "HVS9_HCH8NDMR2600": "Hemmavasan skidor 90",
+        "TVJ_HCH8NDMR2600": "Tjejvasan (Junior 17-20)",
+        "TVM_HCH8NDMR2600": "Tjejvasan (Motion)",
+        "TVT_HCH8NDMR2600": "Tjejvasan (Tävling)",
+        "UV9A_HCH8NDMR2600": "Ungdomsvasan 9k 13-14 år",
+        "UV9B_HCH8NDMR2600": "Ungdomsvasan 9k 11-12 år",
+        "VL30_HCH8NDMR2600": "Vasaloppet 30",
+        "ÖSS9_HCH8NDMR2600": "Öppet Spår söndag"
     }
 }
