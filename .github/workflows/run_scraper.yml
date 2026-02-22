@@ -1,4 +1,4 @@
-name: Run scraper for results.vasaloppet.se
+name: Run scraper for all providers
 
 on:
   # Runs every day at midnight
@@ -34,6 +34,6 @@ jobs:
           python3 run_scraper.py
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: Automated scraping of results.vasaloppet.se
+          commit_message: Automated scraping of race results
           file_pattern: 'data'
           add_options: '-A'

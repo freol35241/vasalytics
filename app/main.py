@@ -18,16 +18,23 @@ palette = sns.color_palette("deep")
 ##### Common functions #####
 
 @st.cache_data
-def load_index():
-    response = requests.get(API_ROOT)
+def load_providers():
+    response = requests.get(API_ROOT + "providers.json")
+    response.raise_for_status()
+    return response.json()
+
+
+@st.cache_data
+def load_index(provider_name):
+    response = requests.get(f"{API_ROOT}{provider_name}/index.json")
     response.raise_for_status()
     return response.json()
 
 
 @st.cache_data(show_spinner=False)
-def load_event_data(year, event_id):
+def load_event_data(provider_name, year, event_id):
     # Fetch data
-    url = os.path.join(API_ROOT, "events", year, f"{event_id}.json")
+    url = f"{API_ROOT}{provider_name}/events/{year}/{event_id}.json"
     response = requests.get(url)
     response.raise_for_status()
 
@@ -135,19 +142,33 @@ st.set_page_config(
     page_icon=":material/analytics:"
 )
 
-##### Load index #####
-index_data = load_index() # We will always need the index, lets start by loading that one
-
+##### Load providers #####
+providers = load_providers()
 
 ## Sidebar ##
 with st.sidebar:
     st.markdown("# Vasalytics :material/analytics:")
     st.markdown("<a href='https://github.com/freol35241/vasalytics' target='_blank'><img src='https://badgen.net/badge/freol35241/vasalytics?icon=github' border='0' alt='Github repository' /></a>  <a href='https://ko-fi.com/Q5Q81BU8ER' target='_blank'><img height='20' style='border:0px;height:20px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>", unsafe_allow_html=True)
-    st.markdown("The missing analytics tool for all race events part of Vasaloppet`s Winter and Summer Week.")
+    st.markdown("The missing analytics tool for race event results and analytics.")
 
+##### Select provider (auto-select if only one) #####
+st.sidebar.divider()
+if len(providers) == 1:
+    selected_provider = providers[0]
+else:
+    st.sidebar.header("Provider")
+    provider_labels = [p["label"] for p in providers]
+    if not (selected_label := st.sidebar.selectbox(
+        "Select Provider", provider_labels, index=None
+    )):
+        render_default()
+        st.stop()
+    selected_provider = providers[provider_labels.index(selected_label)]
+
+##### Load index for selected provider #####
+index_data = load_index(selected_provider["name"])
 
 ##### Select event #####
-st.sidebar.divider()
 st.sidebar.header("Event")
 if not (selected_year := st.sidebar.selectbox(
     "Select Year", sorted(index_data.keys(), reverse=True), index=None
@@ -168,7 +189,7 @@ selected_event_id = event_ids[event_names.index(selected_event_name)]  # Get cor
 
 ##### Load event data #####
 st.toast(f"Loading data for event: {selected_event_name} ({selected_year})")
-if not (event_data := load_event_data(selected_year, selected_event_id)):
+if not (event_data := load_event_data(selected_provider["name"], selected_year, selected_event_id)):
     st.error("No data available for this event.")
     st.stop()
 
