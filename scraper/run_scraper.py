@@ -6,12 +6,14 @@ from tqdm import tqdm
 from scrapy.crawler import CrawlerProcess
 
 from providers.vasaloppet import VasaloppetProvider
+from providers.goteborgsvarvet import GoteborgsvarvetProvider
 
 DATA_ROOT = Path(__file__).parent.parent / "data"
 
 # --- Provider registry ---
 PROVIDERS = [
     VasaloppetProvider(),
+    GoteborgsvarvetProvider(),
 ]
 
 

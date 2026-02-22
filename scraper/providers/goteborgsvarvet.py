@@ -4,17 +4,17 @@ from providers.base import BaseProvider, EventInfo
 from mikatiming_spider import MikaTimingSpider
 
 
-class VasaloppetProvider(BaseProvider):
+class GoteborgsvarvetProvider(BaseProvider):
 
-    BASE_URL = "https://results.vasaloppet.se"
+    BASE_URL = "https://goteborgsvarvet.r.mikatiming.com"
 
     @property
     def name(self) -> str:
-        return "vasaloppet"
+        return "goteborgsvarvet"
 
     @property
     def label(self) -> str:
-        return "Vasaloppet"
+        return "Göteborgsvarvet"
 
     def discover_events(self) -> list[EventInfo]:
         events = []
@@ -34,14 +34,18 @@ class VasaloppetProvider(BaseProvider):
         return MikaTimingSpider
 
     def spider_kwargs(self, event: EventInfo) -> dict:
-        return {"event_id": event.event_id, "base_url": self.BASE_URL}
+        return {
+            "event_id": event.event_id,
+            "base_url": f"{self.BASE_URL}/{event.year}",
+        }
 
-    # --- Private helpers (moved from run_scraper.py) ---
+    # --- Private helpers ---
 
     def _get_years(self):
         response = requests.get(
-            "https://results.vasaloppet.se/index.php"
-            "?content=ajax2&func=getSearchFields&options"
+            f"{self.BASE_URL}/index.php"
+            "?content=ajax2&func=getSearchFields&options",
+            timeout=30,
         )
         response.raise_for_status()
         return [
@@ -52,11 +56,12 @@ class VasaloppetProvider(BaseProvider):
             if isinstance(item["v"][0], int)
         ]
 
-    def _get_events(self, year: int):
+    def _get_events(self, year: str):
         response = requests.get(
-            f"https://results.vasaloppet.se/2025/index.php"
+            f"{self.BASE_URL}/{year}/index.php"
             f"?content=ajax2&func=getSearchFields"
-            f"&options%5Bb%5D%5Blists%5D%5Bevent_main_group%5D={year}"
+            f"&options%5Bb%5D%5Blists%5D%5Bevent_main_group%5D={year}",
+            timeout=30,
         )
         response.raise_for_status()
         all_events = {

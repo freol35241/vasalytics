@@ -24,8 +24,8 @@ def convert_time_to_seconds(time_str):
         return (hours * 3600) + (minutes * 60) + seconds
 
 
-class VasalyticsSpider(CrawlSpider):
-    name = "vasalytics"
+class MikaTimingSpider(CrawlSpider):
+    name = "mikatiming"
     rules = (
         Rule(
             LinkExtractor(restrict_css="ul.pagination > li.pages-nav-button"),
@@ -34,10 +34,10 @@ class VasalyticsSpider(CrawlSpider):
         Rule(LinkExtractor(allow=r"\?content=detail"), callback="parse_details"),
     )
 
-    def __init__(self, event_id, *args, **kwargs):
+    def __init__(self, event_id, base_url, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.start_urls = [f"https://results.vasaloppet.se/?event={event_id}&pid=list"]
+        self.start_urls = [f"{base_url}/?event={event_id}&pid=list"]
 
     def parse_details(self, response):
         """Extracts split data for each participant"""
