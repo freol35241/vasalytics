@@ -63,10 +63,20 @@ def get_events(year: int):
         f"https://results.vasaloppet.se/2025/index.php?content=ajax2&func=getSearchFields&options%5Bb%5D%5Blists%5D%5Bevent_main_group%5D={year}"
     )
     response.raise_for_status()
-    return {
+    all_events = {
         item["v"][0]: item["v"][1]
         for item in response.json()["branches"]["lists"]["fields"]["event"]["data"]
     }
+
+    # Deduplicate: the API may return multiple event IDs with the same name
+    # (e.g. cross-season events). Keep only the first occurrence per name.
+    seen_names = set()
+    events = {}
+    for event_id, event_name in all_events.items():
+        if event_name not in seen_names:
+            seen_names.add(event_name)
+            events[event_id] = event_name
+    return events
 
 
 def run_crawler(year, event_id):
