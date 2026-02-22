@@ -9,7 +9,7 @@ import datetime
 import requests
 
 ##### Constants #####
-API_ROOT = "https://freol35241.github.io/vasalytics/data/"
+API_ROOT = "https://freol35241.github.io/spurta/data/"
 
 ##### Global configurations
 palette = sns.color_palette("deep")
@@ -55,7 +55,7 @@ def load_event_data(provider_name, year, event_id):
     return df_participants, pd.DataFrame(times, index=df.index), pd.DataFrame(paces, index=df.index)
 
 def render_default():
-    st.header("Welcome to Vasalytics!")
+    st.header("Welcome to SPURTA!")
     st.markdown("Start by selecting a year and event you would like to have a closer look at using the sidebar to the left.")
     st.image(
         "https://upload.wikimedia.org/wikipedia/commons/2/28/Skate_skiing_track.jpg",
@@ -138,7 +138,7 @@ def plot_violin(df: pd.DataFrame, bib_paces: pd.DataFrame = None):
 ################# Streamlit app ###################
 
 st.set_page_config(
-    page_title="Vasalytics",
+    page_title="SPURTA",
     page_icon=":material/analytics:"
 )
 
@@ -147,9 +147,9 @@ providers = load_providers()
 
 ## Sidebar ##
 with st.sidebar:
-    st.markdown("# Vasalytics :material/analytics:")
-    st.markdown("<a href='https://github.com/freol35241/vasalytics' target='_blank'><img src='https://badgen.net/badge/freol35241/vasalytics?icon=github' border='0' alt='Github repository' /></a>  <a href='https://ko-fi.com/Q5Q81BU8ER' target='_blank'><img height='20' style='border:0px;height:20px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>", unsafe_allow_html=True)
-    st.markdown("The missing analytics tool for race event results and analytics.")
+    st.markdown("# SPURTA :material/analytics:")
+    st.markdown("<a href='https://github.com/freol35241/spurta' target='_blank'><img src='https://badgen.net/badge/freol35241/spurta?icon=github' border='0' alt='Github repository' /></a>  <a href='https://ko-fi.com/Q5Q81BU8ER' target='_blank'><img height='20' style='border:0px;height:20px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>", unsafe_allow_html=True)
+    st.markdown("Split Performance & Unified Race Tracking Analytics")
 
 ##### Select provider (auto-select if only one) #####
 st.sidebar.divider()

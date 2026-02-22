@@ -177,13 +177,13 @@ class VasaloppetProvider(BaseProvider):
         return events
 
     def create_spider_cls(self):
-        return VasalyticsSpider   # The existing spider, unchanged
+        return MikaTimingSpider   # The existing spider, unchanged
 
     def spider_kwargs(self, event):
         return {"event_id": event.event_id}
 ```
 
-The existing `VasalyticsSpider` stays almost exactly as-is — it already takes an `event_id` and knows how to crawl `results.vasaloppet.se`.
+The existing `MikaTimingSpider` stays almost exactly as-is — it already takes an `event_id` and knows how to crawl `results.vasaloppet.se`.
 
 ### Layer 3: Orchestrator Refactor
 
@@ -253,7 +253,7 @@ Provider → Year → Event → Filters → Visualizations
 The data loading changes minimally:
 
 ```python
-API_ROOT = "https://freol35241.github.io/vasalytics/data/"
+API_ROOT = "https://freol35241.github.io/spurta/data/"
 
 def load_providers():
     return requests.get(API_ROOT + "providers.json").json()
