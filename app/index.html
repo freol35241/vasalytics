@@ -224,24 +224,19 @@ df_participants, df_times, df_paces = event_data
 mask = pd.Series(True, index=df_participants.index)
 
 #### Gender ####
-can_filter_on_gender_male = any(
-    item.startswith("H") for item in df_participants["age_class"].unique()
-)
-can_filter_on_gender_female = any(
-    item.startswith("D") for item in df_participants["age_class"].unique()
-)
+# Known gender prefix pairs: Vasaloppet uses H/D, Göteborgsvarvet uses M/K
+GENDER_PREFIX_PAIRS = [("H", "D"), ("M", "K")]
 
-selected_gender = st.sidebar.selectbox(
-    "Filter by Gender",
-    (
-        ["All"]
-        + (
-            ["H", "D"]
-            if (can_filter_on_gender_male and can_filter_on_gender_female)
-            else []
-        )
-    ),
-)
+gender_options = ["All"]
+unique_classes = df_participants["age_class"].unique()
+for male_prefix, female_prefix in GENDER_PREFIX_PAIRS:
+    has_male = any(item.startswith(male_prefix) for item in unique_classes)
+    has_female = any(item.startswith(female_prefix) for item in unique_classes)
+    if has_male and has_female:
+        gender_options.extend([male_prefix, female_prefix])
+        break
+
+selected_gender = st.sidebar.selectbox("Filter by Gender", gender_options)
 if selected_gender != "All":
     mask_gender = df_participants["age_class"].str.startswith(selected_gender)
     mask &= mask_gender
