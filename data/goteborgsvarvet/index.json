@@ -1,0 +1,107 @@
+{
+    "2010": {
+        "GV_9TG4PPOP227": "Göteborgsvarvet"
+    },
+    "2011": {
+        "GV_9TG4PPOP228": "Göteborgsvarvet"
+    },
+    "2012": {
+        "GV_9TG4PPOP229": "Göteborgsvarvet"
+    },
+    "2013": {
+        "GV_9TG4PPOP231": "Göteborgsvarvet"
+    },
+    "2014": {
+        "GV_9TG4PPOP232": "Göteborgsvarvet",
+        "LVK_9TG4PPOP247": "Lilla Varvet - 7-10 år",
+        "LVL_9TG4PPOP247": "Lilla Varvet - 11-12 år"
+    },
+    "2015": {
+        "GV_9TG4PPOP233": "Göteborgsvarvet",
+        "LVK_9TG4PPOP248": "Lilla Varvet - 7-10 år",
+        "LVL_9TG4PPOP248": "Lilla Varvet - 11-12 år"
+    },
+    "2016": {
+        "GV_9TG4PPOP234": "Göteborgsvarvet",
+        "LVK_9TG4PPOP249": "Lilla Varvet - 7-10 år",
+        "LVL_9TG4PPOP249": "Lilla Varvet - 11-12 år",
+        "TV_9TG4PPOP2F8": "Trailvarvet"
+    },
+    "2017": {
+        "GV_9TG4PPOP235": "Göteborgsvarvet",
+        "TV_9TG4PPOP2F9": "Trailvarvet"
+    },
+    "2018": {
+        "GV_9TG4PPOP236": "Göteborgsvarvet",
+        "TV_9TG4PPOP2FB": "Trailvarvet"
+    },
+    "2019": {
+        "GV_9TG4PPOP300": "Göteborgsvarvet",
+        "LV13_9TG4PPOP351": "Lilla Varvet - 13 år",
+        "LVK_9TG4PPOP351": "Lilla Varvet - 7-10 år",
+        "LVL_9TG4PPOP351": "Lilla Varvet - 11-12 år",
+        "TV_9TG4PPOP303": "Trailvarvet"
+    },
+    "2021": {
+        "DGVM_9TG4PPOP35F": "Digitala Göteborgsvarvet Marathon",
+        "GV_9TG4PPOP334": "Digitala Göteborgsvarvet"
+    },
+    "2022": {
+        "GV_9TG4PPOP345": "Göteborgsvarvet",
+        "LV13_9TG4PPOP357": "Lilla Varvet - 13 år",
+        "LVK_9TG4PPOP357": "Lilla Varvet - 7-10 år",
+        "LVL_9TG4PPOP357": "Lilla Varvet - 11-12 år",
+        "TV_9TG4PPOP343": "Trailvarvet"
+    },
+    "2023": {
+        "GVM_9TG4PPOP360": "Göteborgsvarvet Marathon",
+        "GV_9TG4PPOP350": "Göteborgsvarvet",
+        "LV13_9TG4PPOP359": "Lilla Varvet - 13 år",
+        "LVK_9TG4PPOP359": "Lilla Varvet - 7-10 år",
+        "LVL_9TG4PPOP359": "Lilla Varvet - 11-12 år",
+        "TV_9TG4PPOP34E": "Trailvarvet"
+    },
+    "2024": {
+        "ALLA_9TG4PPOP195": "Göteborgsvarvet (Varvetveteraner)",
+        "CV_9TG4PPOP195": "Cityvarvet",
+        "D10S_9TG4PPOP195": "Digitala Varvetmilen (Fastest run)",
+        "FMM_9TG4PPOP195": "Göteborgsvarvet (Försvarsmakten)",
+        "GV_9TG4PPOP195": "Göteborgsvarvet",
+        "L13_9TG4PPOP195": "Lilla Varvet - 13 år",
+        "LK_9TG4PPOP195": "Lilla Varvet - 7-10 år",
+        "LL_9TG4PPOP195": "Lilla Varvet - 11-12 år",
+        "POLI_9TG4PPOP195": "Polis",
+        "RADD_9TG4PPOP195": "Räddningstjänsten",
+        "SB_9TG4PPOP195": "Specialvarvet - Blå (2,1 km)",
+        "SOLA_9TG4PPOP195": "Göteborgsvarvet (Solar)",
+        "SR_9TG4PPOP195": "Specialvarvet - Röd (3,3 km)",
+        "STV_9TG4PPOP195": "Stafettvarvet",
+        "TV_9TG4PPOP195": "Trailvarvet",
+        "VGR_9TG4PPOP195": "Göteborgsvarvet (Västra Götalandsregionen)",
+        "VMG_9TG4PPOP195": "Varvetmilen Göteborg",
+        "VMJ_9TG4PPOP195": "Varvetmilen Jönköping",
+        "VMM_9TG4PPOP195": "Varvetmilen Malmö",
+        "VMO_9TG4PPOP195": "Varvetmilen Örebro",
+        "VMT_9TG4PPOP195": "Varvetmilen Täby",
+        "VOLV_9TG4PPOP195": "Göteborgsvarvet (Volvo)"
+    },
+    "2025": {
+        "ALLA_9TG4PPOP36D": "Göteborgsvarvet (Varvetveteraner)",
+        "CV_9TG4PPOP36D": "Cityvarvet",
+        "DV10_9TG4PPOP36D": "Digitala Varvetmilen",
+        "FMM_9TG4PPOP36D": "Göteborgsvarvet (Försvarsmakten)",
+        "GV_9TG4PPOP36D": "Göteborgsvarvet",
+        "L13_9TG4PPOP36D": "Lilla Varvet - 13 år",
+        "LK_9TG4PPOP36D": "Lilla Varvet - 7-10 år",
+        "LL_9TG4PPOP36D": "Lilla Varvet - 11-12 år",
+        "SB_9TG4PPOP36D": "Specialvarvet - Blå (1,4 km)",
+        "SOLA_9TG4PPOP36D": "Göteborgsvarvet (Solar)",
+        "SR_9TG4PPOP36D": "Specialvarvet - Röd (2,4 km)",
+        "STV_9TG4PPOP36D": "Stafettvarvet",
+        "VGR_9TG4PPOP36D": "Göteborgsvarvet (Västra Götalandsregionen)",
+        "VMG_9TG4PPOP36D": "Varvetmilen Göteborg",
+        "VMM_9TG4PPOP36D": "Varvetmilen Malmö",
+        "VMS_9TG4PPOP36D": "Varvetmilen Sollentuna",
+        "VOLV_9TG4PPOP36D": "Göteborgsvarvet (Volvo)"
+    }
+}

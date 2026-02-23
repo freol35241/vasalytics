@@ -2,5 +2,9 @@
     {
         "name": "vasaloppet",
         "label": "Vasaloppet"
+    },
+    {
+        "name": "goteborgsvarvet",
+        "label": "Göteborgsvarvet"
     }
 ]
