@@ -1,3 +1,4 @@
+import argparse
 import json
 import multiprocessing
 from pathlib import Path
@@ -83,6 +84,16 @@ def run_crawler(spider_cls, spider_kwargs, feed_output_uri):
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(description="Scrape race results from all providers.")
+    parser.add_argument(
+        "--years",
+        nargs="+",
+        help="Only scrape events from these years (e.g. --years 2024 2025). "
+             "If omitted, all available years are scraped.",
+    )
+    args = parser.parse_args()
+    year_filter = set(args.years) if args.years else None
+
     write_providers_json()
 
     for provider in PROVIDERS:
@@ -92,6 +103,9 @@ if __name__ == "__main__":
 
         print(f"\n=== Provider: {provider.label} ===")
         events = provider.discover_events()
+
+        if year_filter:
+            events = [e for e in events if e.year in year_filter]
 
         for event in tqdm(events, desc=provider.label):
             index = load_index(index_file)

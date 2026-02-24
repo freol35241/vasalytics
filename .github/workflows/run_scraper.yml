@@ -30,8 +30,9 @@ jobs:
           pip install -r requirements.txt
       - name: Run scraper
         run: |
+          LAST_FULL_YEAR=$(date -d "last year" +%Y)
           cd scraper
-          python3 run_scraper.py
+          python3 run_scraper.py --years "$LAST_FULL_YEAR"
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Automated scraping of race results
